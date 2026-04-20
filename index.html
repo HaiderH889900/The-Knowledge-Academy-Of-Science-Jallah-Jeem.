@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registration System | CEO Hasnain</title>
+    <style>
+        :root {
+            --navy: #001f3f;
+            --white: #ffffff;
+            --accent: #0074D9;
+            --bg-image: none;
+            --bg-color: #f4f7f6;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body {
+            margin: 0;
+            background: var(--bg-color);
+            background-image: var(--bg-image);
+            background-size: cover;
+            background-attachment: fixed;
+            transition: all 0.5s ease;
+        }
+
+        /* Animations */
+        @keyframes flyIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .flyout { animation: flyIn 0.5s ease-out; }
+
+        /* Login Screen */
+        #login-screen {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: var(--navy);
+        }
+
+        .login-box {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            width: 350px;
+        }
+
+        /* Dashboard */
+        #dashboard { display: none; padding: 20px; }
+
+        header {
+            background: var(--navy);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .form-container {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid var(--navy);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .grid-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        input, select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+        }
+
+        .button-box {
+            background: #e7f3ff;
+            border: 2px solid var(--accent);
+            padding: 15px;
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            border-radius: 8px;
+        }
+
+        .btn-save { background: var(--accent); color: white; border: none; padding: 10px 25px; cursor: pointer; }
+        .btn-discard { background: #ff4136; color: white; border: none; padding: 10px 25px; cursor: pointer; }
+
+        /* Table */
+        .student-list {
+            margin-top: 30px;
+            background: white;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .student-list th, .student-list td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .student-list th { background: var(--navy); color: white; }
+
+        /* Settings Overlay */
+        #settings-panel {
+            display: none;
+            position: fixed;
+            right: 0; top: 0;
+            width: 300px;
+            height: 100%;
+            background: white;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.2);
+            padding: 20px;
+            z-index: 100;
+        }
+
+        .footer-tag {
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+            color: var(--navy);
+        }
+
+        .phone-style {
+            font-family: 'Arial Black', sans-serif;
+            font-size: 1.2rem;
+            color: #d35400;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen">
+        <div class="login-box">
+            <h2 style="color: var(--navy)">CEO Login</h2>
+            <input type="text" id="user-input" placeholder="Username (Hasnain)"><br><br>
+            <input type="password" id="pass-input" placeholder="Password"><br><br>
+            <button onclick="login()" style="width:100%; padding:10px; background:var(--navy); color:white; border:none;">Login</button>
+        </div>
+    </div>
+
+    <div id="dashboard" class="flyout">
+        <header>
+            <div><strong>CEO: Hasnain</strong></div>
+            <div style="display: flex; gap: 20px; align-items: center;">
+                <span onclick="toggleSettings()" style="cursor:pointer; font-size: 1.5rem;">⚙️</span>
+                <button onclick="logout()" style="background:red; color:white; border:none; padding:5px 10px;">Logout</button>
+            </div>
+        </header>
+
+        <div class="form-container">
+            <h3 style="color: var(--navy); border-bottom: 2px solid var(--navy);">Student Registration</h3>
+            <div class="grid-form">
+                <input type="text" id="sName" placeholder="Student Name">
+                <input type="text" id="fName" placeholder="Father Name">
+                <input type="text" id="address" placeholder="Address">
+                <input type="text" id="mobile" placeholder="Mobile Number">
+                <input type="date" id="joinDate">
+                <input type="number" id="totalFees" placeholder="Total Fees" oninput="calcFees()">
+                <input type="number" id="paidFees" placeholder="Obtained Fees" oninput="calcFees()">
+                <input type="number" id="remFees" placeholder="Remaining Fees" readonly style="background: #eee;">
+            </div>
+
+            <div class="button-box">
+                <button class="btn-save" onclick="saveStudent()">SAVE</button>
+                <button class="btn-discard" onclick="clearForm()">DISCARD</button>
+            </div>
+        </div>
+
+        <table class="student-list" id="studentTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Father Name</th>
+                    <th>Mobile</th>
+                    <th>Remaining</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+
+        <div class="footer-tag">
+            Made by IT Engineer: Hasnain Haider<br>
+            <span class="phone-style">03014464374</span>
+        </div>
+    </div>
+
+    <div id="settings-panel">
+        <h3>Settings</h3>
+        <hr>
+        <h4>Change Theme</h4>
+        <button onclick="setTheme('navy')">Navy Default</button>
+        <button onclick="setTheme('sunset')">Sunset Colorful</button>
+        <button onclick="setTheme('forest')">Forest Green</button>
+        
+        <hr>
+        <h4>Change Password</h4>
+        <input type="password" id="oldPass" placeholder="Current Password"><br><br>
+        <input type="password" id="newPass" placeholder="New Password"><br><br>
+        <button onclick="changePassword()">Update Password</button>
+        
+        <br><br>
+        <button onclick="toggleSettings()" style="width: 100%;">Close</button>
+    </div>
+
+    <script>
+        let currentPassword = "12345";
+        let students = JSON.parse(localStorage.getItem('students')) || [];
+        let editIndex = -1;
+
+        function login() {
+            const u = document.getElementById('user-input').value;
+            const p = document.getElementById('pass-input').value;
+            if(u === "Hasnain" && p === currentPassword) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                renderTable();
+            } else {
+                alert("Access Denied!");
+            }
+        }
+
+        function logout() {
+            location.reload();
+        }
+
+        function calcFees() {
+            const total = document.getElementById('totalFees').value || 0;
+            const paid = document.getElementById('paidFees').value || 0;
+            document.getElementById('remFees').value = total - paid;
+        }
+
+        function saveStudent() {
+            const student = {
+                name: document.getElementById('sName').value,
+                fname: document.getElementById('fName').value,
+                address: document.getElementById('address').value,
+                mobile: document.getElementById('mobile').value,
+                date: document.getElementById('joinDate').value,
+                total: document.getElementById('totalFees').value,
+                paid: document.getElementById('paidFees').value,
+                rem: document.getElementById('remFees').value
+            };
+
+            if(editIndex === -1) {
+                students.push(student);
+            } else {
+                students[editIndex] = student;
+                editIndex = -1;
+            }
+
+            localStorage.setItem('students', JSON.stringify(students));
+            renderTable();
+            clearForm();
+            alert("Data Saved Permanently!");
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            students.forEach((s, index) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${s.name}</td>
+                        <td>${s.fname}</td>
+                        <td>${s.mobile}</td>
+                        <td>${s.rem}</td>
+                        <td>
+                            <button onclick="editStudent(${index})">Edit</button>
+                            <button onclick="removeStudent(${index})" style="color:red">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function removeStudent(index) {
+            if(confirm("Remove this student?")) {
+                students.splice(index, 1);
+                localStorage.setItem('students', JSON.stringify(students));
+                renderTable();
+            }
+        }
+
+        function editStudent(index) {
+            const s = students[index];
+            document.getElementById('sName').value = s.name;
+            document.getElementById('fName').value = s.fname;
+            document.getElementById('address').value = s.address;
+            document.getElementById('mobile').value = s.mobile;
+            document.getElementById('joinDate').value = s.date;
+            document.getElementById('totalFees').value = s.total;
+            document.getElementById('paidFees').value = s.paid;
+            document.getElementById('remFees').value = s.rem;
+            editIndex = index;
+            window.scrollTo(0,0);
+        }
+
+        function clearForm() {
+            document.querySelectorAll('.grid-form input').forEach(i => i.value = '');
+            editIndex = -1;
+        }
+
+        function toggleSettings() {
+            const panel = document.getElementById('settings-panel');
+            panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
+        }
+
+        function setTheme(theme) {
+            const root = document.documentElement;
+            if(theme === 'sunset') {
+                root.style.setProperty('--bg-image', 'linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%)');
+            } else if(theme === 'forest') {
+                root.style.setProperty('--bg-image', 'linear-gradient(to right, #11998e, #38ef7d)');
+            } else {
+                root.style.setProperty('--bg-image', 'none');
+                root.style.setProperty('--bg-color', '#f4f7f6');
+            }
+        }
+
+        function changePassword() {
+            const oldP = document.getElementById('oldPass').value;
+            const newP = document.getElementById('newPass').value;
+            if(oldP === currentPassword) {
+                currentPassword = newP;
+                alert("Password Changed Successfully!");
+                toggleSettings();
+            } else {
+                alert("Old password incorrect!");
+            }
+        }
+    </script>
+</body>
+</html>
